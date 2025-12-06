@@ -1,4 +1,4 @@
-# ImageRevive: Multi-Agent AI Image Restoration Framework
+# ImageRevive: Multi-Agent AI Image Restoration
 
 ## Overview
 
