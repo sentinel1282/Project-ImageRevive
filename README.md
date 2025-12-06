@@ -282,3 +282,4 @@ If you use ImageRevive in your research, please cite:
 ## Contact
 
 For questions and support, please open an issue on GitHub.
+
