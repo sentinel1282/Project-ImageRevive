@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageRevive - AI-Powered Image Restoration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+
+        .upload-section:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .tasks-section {
+            margin: 30px 0;
+        }
+
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .task-option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .task-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .task-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+        }
+
+        .task-option input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .task-desc {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .process-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin-top: 20px;
+        }
+
+        .process-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .process-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .preview-section {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .preview-section.active {
+            display: grid;
+        }
+
+        .preview-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .preview-box h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .preview-box img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .progress-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .progress-section.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .download-btn {
+            background: #28a745;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+        }
+
+        .metrics-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .metric-value {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 ImageRevive</h1>
+            <p class="tagline">Professional AI-Powered Image Restoration</p>
+        </header>
+
+        <div class="main-content">
+            <div class="upload-section" id="uploadSection">
+                <h2>Upload Your Image</h2>
+                <p style="margin: 20px 0; color: #666;">Drag & drop or click to select</p>
+                <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.bmp,.tiff">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    Choose Image
+                </button>
+                <p style="margin-top: 15px; font-size: 0.9em; color: #999;">
+                    Supported formats: JPG, PNG, BMP, TIFF (Max 10MB)
+                </p>
+            </div>
+
+            <div class="tasks-section">
+                <h2>Select Restoration Tasks</h2>
+                <div class="task-grid">
+                    <div class="task-option" data-task="denoising">
+                        <input type="checkbox" id="task-denoising" checked>
+                        <label for="task-denoising">
+                            <div class="task-title">🔍 Denoising</div>
+                            <div class="task-desc">Remove noise while preserving details</div>
+                        </label>
+                    </div>
+                    <div class="task-option" data-task="super_resolution">
+                        <input type="checkbox" id="task-sr" checked>
+                        <label for="task-sr">
+                            <div class="task-title">📈 Super-Resolution</div>
+                            <div class="task-desc">Enhance image resolution (2x-4x)</div>
+                        </label>
+                    </div>
+                    <div class="task-option" data-task="colorization">
+                        <input type="checkbox" id="task-color">
+                        <label for="task-color">
+                            <div class="task-title">🎨 Colorization</div>
+                            <div class="task-desc">Add realistic colors to grayscale images</div>
+                        </label>
+                    </div>
+                    <div class="task-option" data-task="inpainting">
+                        <input type="checkbox" id="task-inpaint">
+                        <label for="task-inpaint">
+                            <div class="task-title">🖌️ Inpainting</div>
+                            <div class="task-desc">Fill missing or damaged regions</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <button class="process-btn" id="processBtn" disabled>
+                    Start Restoration
+                </button>
+            </div>
+
+            <div class="progress-section" id="progressSection">
+                <h3>Processing...</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill">0%</div>
+                </div>
+                <div id="statusMessage"></div>
+            </div>
+
+            <div class="preview-section" id="previewSection">
+                <div class="preview-box">
+                    <h3>Original Image</h3>
+                    <img id="originalPreview" alt="Original">
+                </div>
+                <div class="preview-box">
+                    <h3>Restored Image</h3>
+                    <img id="restoredPreview" alt="Restored">
+                    <div style="text-align: center;">
+                        <button class="download-btn" id="downloadBtn" style="display: none;">
+                            Download Restored Image
+                        </button>
+                    </div>
+                    <div class="metrics-box" id="metricsBox" style="display: none;">
+                        <h4>Quality Metrics</h4>
+                        <div id="metricsContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 ImageRevive | Powered by Multi-Agent AI</p>
+        </footer>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let jobId = null;
+
+        // File upload handling
+        const fileInput = document.getElementById('fileInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const processBtn = document.getElementById('processBtn');
+        const progressSection = document.getElementById('progressSection');
+        const previewSection = document.getElementById('previewSection');
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(e) {
+            selectedFile = e.target.files[0];
+            if (selectedFile) {
+                processBtn.disabled = false;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('originalPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(selectedFile);
+            }
+        }
+
+        // Drag and drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect({ target: { files } });
+            }
+        });
+
+        // Task selection
+        document.querySelectorAll('.task-option').forEach(option => {
+            option.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'INPUT') {
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                }
+                this.classList.toggle('selected', this.querySelector('input[type="checkbox"]').checked);
+            });
+        });
+
+        // Process button
+        processBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            const tasks = [];
+            document.querySelectorAll('.task-option input:checked').forEach(cb => {
+                tasks.push(cb.id.replace('task-', '').replace('sr', 'super_resolution').replace('color', 'colorization').replace('inpaint', 'inpainting'));
+            });
+
+            if (tasks.length === 0) {
+                alert('Please select at least one restoration task');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('tasks', tasks.join(','));
+
+            progressSection.classList.add('active');
+            processBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/restore', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                jobId = data.job_id;
+
+                checkStatus(jobId);
+            } catch (error) {
+                showError('Error uploading image: ' + error.message);
+                processBtn.disabled = false;
+            }
+        });
+
+        // Check job status
+        async function checkStatus(jobId) {
+            const response = await fetch(`/api/status/${jobId}`);
+            const data = await response.json();
+
+            updateProgress(data.progress || 0);
+
+            if (data.status === 'completed') {
+                showSuccess('Restoration completed!');
+                loadResult(jobId);
+            } else if (data.status === 'failed') {
+                showError('Restoration failed: ' + (data.error || 'Unknown error'));
+                processBtn.disabled = false;
+            } else {
+                setTimeout(() => checkStatus(jobId), 1000);
+            }
+        }
+
+        function updateProgress(percent) {
+            const fill = document.getElementById('progressFill');
+            fill.style.width = percent + '%';
+            fill.textContent = percent + '%';
+        }
+
+        async function loadResult(jobId) {
+            const downloadUrl = `/api/download/${jobId}`;
+            
+            // Load restored image
+            const img = document.getElementById('restoredPreview');
+            img.src = downloadUrl;
+
+            // Show preview and download button
+            previewSection.classList.add('active');
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.style.display = 'inline-block';
+            downloadBtn.onclick = () => window.location.href = downloadUrl;
+
+            // Show metrics (mock data for demo)
+            const metricsBox = document.getElementById('metricsBox');
+            const metricsContent = document.getElementById('metricsContent');
+            metricsBox.style.display = 'block';
+            metricsContent.innerHTML = `
+                <div class="metric-item">
+                    <span class="metric-label">Quality Score</span>
+                    <span class="metric-value">0.92</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">PSNR</span>
+                    <span class="metric-value">35.2 dB</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">SSIM</span>
+                    <span class="metric-value">0.94</span>
+                </div>
+            `;
+
+            processBtn.disabled = false;
+        }
+
+        function showSuccess(message) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = 'status-message success';
+            statusDiv.textContent = message;
+        }
+
+        function showError(message) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = 'status-message error';
+            statusDiv.textContent = message;
+        }
+    </script>
+</body>
+</html>
